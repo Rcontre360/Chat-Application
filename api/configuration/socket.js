@@ -1,6 +1,8 @@
+const {v4} = require("uuid");
 
 const corsConfig = require("./cors");
 const {Users,Messages} = require("../schemas");
+const {asyncHandler} = require("../error_handlers");
 
 const configureSocket = (server)=>{
 
@@ -10,62 +12,71 @@ const configureSocket = (server)=>{
 
 	io.on('connection',(socket) => {
 
-		socket.on("joinRoom",(data)=>{
+		socket.on("joinRoom",asyncHandler(async (data)=>{
 			const {name,id,email} = data;
 
-			console.log("joinRoom",data)
+			console.log("joinRoom",data);
 
 			socket.join(id);
 			console.log("connect to: ",name,email,id)
 			socket.broadcast.emit("userConnected",{name,email,id,logged:true});
 
-		});
+		}));
 
-		socket.on("leaveRoom",(data)=>{
+		socket.on("leaveRoom",asyncHandler(async (data)=>{
 			const {id,name} = data;
-			console.log("leaveRoom",data)
+			console.log("leaveRoom",data);
 
 			socket.broadcast.to(id).emit("sistem-message",{message:name+" has leaved the room"});
 			socket.leave(id);
 
-		});
+		}));
 
-		socket.on("message",(data)=>{
+		socket.on("message",asyncHandler(async (data)=>{
+
 			console.log("message",data)
 			const {user,friend,message} = data;
 
-			if (user.id==0 || friend.id==0)
-				return;
-
-			if (!Messages[user.id-1][friend.id-1]){
-				Messages[user.id-1][friend.id-1] = {
-					friendName:friend.name,
-					messages:[]
-				}
-				Messages[friend.id-1][user.id-1] = {
-					friendName:user.name,
-					messages:[]
-				}
+			const setMessageWithFriend = async (userId,friendId)=>{
+				await Messages.update({userId},
+				{
+					$push:{
+						friend:{
+							friendId,
+							messages:[],		
+						}
+					}
+				});
 			}
 
-			Messages[user.id-1][friend.id-1]
-			.messages.push({
-				fromUser:"user",
-				message
-			});
+			const setUserMessage = async (userId,friendId,message,source)=>{
+				const userDoc = await Messages.findOne({userId});
+				const friendIndex = userDoc.friend.findIndex(e=>e.friendId===friendId);
 
-			Messages[friend.id-1][user.id-1]
-			.messages.push({
-				fromUser:"arrive",
-				message
-			})
+				userDoc.friend[friendIndex].messages.push({
+					message,
+					source,
+					seen:false
+				});
+				userDoc.save();
+			}
 
-			const {room} = Users.find(u=>u.name===friend.name && u.id===friend.id);
-			console.log("at room: ",room);
+			if (!user.id || !friend.id)
+				return;
 
+			const userHasMessageHistory = await Messages.findOne({userId:user.id,friend:{$elemMatch:{friendId:friend.id}}});
+
+			if (!userHasMessageHistory){
+				setMessageWithFriend(user.id,friend.id);
+				setMessageWithFriend(friend.id,user.id);
+			}
+
+			setUserMessage(user.id,friend.id,message,true);
+			setUserMessage(friend.id,user.id,message,false);
+			
+			const {room} = await Users.findById(friend.id);
 			socket.broadcast.to(room).emit("message",{user,message});
-
-		});
+		}));
 
 		socket.on("disconnect",(data,other)=>{
 			console.log("disconnect",data,other);

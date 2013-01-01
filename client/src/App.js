@@ -85,10 +85,10 @@ class App extends React.Component{
 			}).then(res=>{
 				return res.json();
 			}).then(res=>{
-				//console.log("postRes: ",url,body,res)
+				console.log("postRes: ",url,body,res)
 				resolve(res);
 			}).catch(err=>{
-				//console.log("postError: ",url,body,err.message)
+				console.log("postError: ",url,body,err.message)
 				reject(err);
 			});
 		});
@@ -106,10 +106,10 @@ class App extends React.Component{
 			}).then(res=>{
 				return res.json();
 			}).then(res=>{
-				//console.log("getRes: ",url,query,res)
+				console.log("getRes: ",url,query,res)
 				resolve(res);
 			}).catch(err=>{
-				//console.log("getError: ",url,query,err.message)
+				console.log("getError: ",url,query,err.message)
 				reject(err);
 			});
 		});

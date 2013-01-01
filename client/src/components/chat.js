@@ -64,17 +64,14 @@ export const ChatBox = (props)=>{
 				addMessage({message,fromUser:"arrive"});
 		}
 
-		console.log("useEffect")
 		socket.off("message");
 		socket.on("message",listenMessage);
-
-		console.log(socket)
 
 		if (friendTarget.id!=1000){
 			const response = await get("/users/messages",{friendId:friendTarget.id,id:userData.id});
 
 			if (response.data)
-				setMessages([...response.data.messages]);
+				setMessages([...response.data]);
 			else 
 				setMessages([]);
 		}
@@ -89,8 +86,8 @@ export const ChatBox = (props)=>{
 			<div className="chatBox-body">
 			{
 				allMessages.map((msg,id)=>{
-					const {fromUser,message} = msg;
-					return <Message key={id} user={fromUser} 
+					const {source,message} = msg;
+					return <Message key={id} user={source} 
 							text={message}/>
 				})
 			}
