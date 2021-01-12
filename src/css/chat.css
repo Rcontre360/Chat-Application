@@ -1,0 +1,108 @@
+
+
+.chat{
+	display: flex;
+	justify-content: center;
+	padding-top:80px;
+}
+
+.chatBox{
+	background: var(--darkDark-1);
+	width: 50%;
+	max-width: 400px;
+	min-width: 250px;
+	border-radius: 7px;
+}
+
+.chatBox-head{
+	padding:10px;
+}
+
+.chatBox-body{
+	height:28vw;
+	max-height:370px;
+	min-height: 250px;
+	background: white;
+	display:flex;
+	flex-direction: column;
+	padding:0px 10px;
+	overflow-y: scroll;
+}
+
+.message{
+	max-width: 80%;
+	border-radius:20px;
+	padding:5px 15px;
+	color:white;
+	margin:5px 0px;
+	flex-basis: auto;
+}
+
+.message-user{
+	background:#6998D2;
+	align-self: flex-end; 
+	text-align: right;
+}
+
+.message-sistem{
+	color:#A9ACB1;
+	font-size:12px;
+	align-self: center;
+	background-image:radial-gradient(at center,#EBEDEE,white);
+	padding:7px 15px;
+}
+
+.message-arrive{
+	background:#8C9AAA;
+	align-self: flex-start;
+	text-align: left;
+}
+
+.chatBox-foot{
+	padding:10px;
+}
+
+.chatBox-foot form{
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.chatBox-foot form input{
+	background: var(--darkDark-2);
+	color:lightgrey;
+	font-size:15px;
+	padding:0px 6px;
+	border:inset grey 2px;
+	border-radius: 10px;
+	outline:none;
+	width:80%
+}
+
+.chatBox-foot form input::placeholder{
+ 	color:var(--darkClear-1);
+ 	transition:1s;
+ }
+
+.chatBox-foot form input:focus::placeholder{
+ 	transform: translateX(100px);
+ 	opacity: 0;
+ 	transition: 1s;
+}
+
+.chatBox-foot form button{
+	background:var(--darkGreen);
+	font-size:15px;
+	padding:0px 6px;
+	border:outset 3px var(--darkGreen);
+	border-radius:5px;
+	margin:auto;
+	color:white;
+	outline: none;
+}
+
+.chatBox-foot form button:active{
+	background: #217C50;
+	border:inset 3px var(--darkGreen);
+	color:lightgrey;
+}
