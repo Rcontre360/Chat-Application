@@ -53,7 +53,7 @@ router.post("/register",asyncHandler(async (req,res)=>{
 
 	if (response){
 		let err = new Error("Username or email were already taken");
-		err.status = 401;
+		err.status = 403;
 		throw err;
 	}
 

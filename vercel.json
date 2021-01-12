@@ -1,3 +1,18 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+  "builds": [
+    {
+      "src": "/api/index.js",//"/dist/apps/api/main.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "/src",//"/dist/apps/react-app/*",
+      "use": "@now/static"
+    }
+  ],
+  "routes": [
+    {
+            "src": "/(.*)",
+            "dest": "/"
+    }
+  ]
 }
