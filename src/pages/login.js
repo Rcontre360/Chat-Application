@@ -1,6 +1,7 @@
 import React from "react";
 
 import {Form} from "../components/form";
+import Message from "../components/message";
 
 import "../css/form.css";
 
@@ -14,8 +15,12 @@ const loginForm = [
 	{htmlType:"button",type:"submit",className:"login-button",child:"Sumbit"},
 ]
 
+
+
 export const Login = (props)=>{
-	const {setUser,history} = props;
+	const [showMessage,setShowMessage] = React.useState(false);
+	const [messageData,setMessageData] = React.useState({});
+	const {loginUser,history} = props;
 	const userData = {};
 
 	const setDataValues = (dataType,e)=>{
@@ -24,12 +29,19 @@ export const Login = (props)=>{
 
 	const sendUserData = (e)=>{
 		e.preventDefault();
-		setUser({...userData,logged:true})
-		history.push("/users");
+		loginUser({...userData,logged:true})
+		.then(res=>{
+			history.push("/users");
+		})
+		.catch(err=>{
+			setMessageData({message:err.error});
+			setShowMessage(true);
+		})
 	}
 
 	return(
 	<div className="form-wrapper">
+		{showMessage && <Message closeMessage={setShowMessage.bind(this)} {...messageData}/>}
 		<div className="form">
 			<h1 className="login-title">Login</h1>
 			<Form elements={loginForm} onSendData={sendUserData.bind(this)} onChangeValue={setDataValues.bind(this)}/>

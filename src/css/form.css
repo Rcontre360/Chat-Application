@@ -1,6 +1,7 @@
 .form-wrapper{
 	display:flex;
-	justify-content: center;
+	align-items: center;
+	flex-direction: column;
 	font-family:  Gill Sans Extrabold, sans-serif;
 	padding-top:80px;
 }

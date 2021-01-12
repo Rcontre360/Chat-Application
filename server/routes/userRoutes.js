@@ -35,7 +35,7 @@ router.post("/login",asyncHandler(async (req,res)=>{
 
 	if (!response){
 		let err = new Error("Username, email or password incorrect");
-		err.status = 401;
+		err.status = 201;
 		throw err;
 	}
 
@@ -49,18 +49,18 @@ router.post("/login",asyncHandler(async (req,res)=>{
 router.post("/register",asyncHandler(async (req,res)=>{
 	let user = req.body;
 
+	const response = Users.find(u=>u.name===user.name || u.email===user.email)
+
+	if (response){
+		let err = new Error("Username or email were already taken");
+		err.status = 401;
+		throw err;
+	}
+
 	user.room = Users.length+1;
 	user.id = Users.length+1;
 	Users.push(user);
 	Messages.push({});
-
-	const response = 1//WITH MONGO
-
-	if (!response){
-		let err = new Error("Username, email or password invalid: "+"response_message");
-		err.status = 401;
-		throw err;
-	}
 
 	res.json({
 		message:"success",

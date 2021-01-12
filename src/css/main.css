@@ -93,4 +93,16 @@ body{
 	background: var(--darkGreen);
 }
 
+.app-message{
+	background: var(--darkBack-2);
+	padding:20px 50px;
+	border:solid var(--darkGreen) 2px;
+	border-radius: 20px;
+	margin:0px 0px 20px 0px;
+}
+
+.app-message-text{
+	font-size: 20px;
+}
+
 

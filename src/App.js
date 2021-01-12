@@ -52,7 +52,7 @@ class App extends React.Component{
 			}).then(res=>{
 				resolve(res);
 			}).catch(err=>{
-				reject("error: "+err.message);
+				reject(err);
 			});
 		});
 	}
@@ -74,7 +74,7 @@ class App extends React.Component{
 			}).then(res=>{
 				resolve(res);
 			}).catch(err=>{
-				reject("error: "+err.message);
+				reject(err);
 			});
 		});
 	}
@@ -83,20 +83,38 @@ class App extends React.Component{
 		return this.user.logged;
 	}
 
-	async loginUser(user){
-		const response = await this.postMethod("http://localhost:3001/users/login",user);
-		if (response.message==="success"){
-			this.setUser(response.data);
-			this.socket.emit("joinRoom",response.data);
-		}
+	loginUser(user){
+		return new Promise(async (resolve,reject)=>{
+			const response = await this.postMethod("http://localhost:3001/users/login",user)
+			.catch(err=>{
+				return reject(err);
+			});
+
+			if (response.message==="success"){
+				this.setUser(response.data);
+				this.socket.emit("joinRoom",response.data);
+				return resolve(user);
+			}
+
+			return reject(response);
+		})
 	}
 
-	async registerUser(user){
-		const response = await this.postMethod("http://localhost:3001/users/register",user);
-		if (response.message==="success"){
-			this.setUser(response.data);
-			this.socket.emit("joinRoom",response.data)
-		}
+	registerUser(user){
+		return new Promise(async (resolve,reject)=>{
+			const response = await this.postMethod("http://localhost:3001/users/register",user)
+			.catch(err=>{
+				return reject(err);
+			});
+
+			if (response.message==="success"){
+				this.setUser(response.data);
+				this.socket.emit("joinRoom",response.data);
+				return resolve(user);
+			}
+
+			return reject(response);
+		});
 	}
 
 	setUser(user){
@@ -121,10 +139,10 @@ class App extends React.Component{
 
 			<Redirect to="/register"/>
 			<Route path="/login" render={(p)=>(
-				<Login {...p} setUser={this.loginUser}/>
+				<Login {...p} loginUser={this.loginUser}/>
 			)}/>
 			<Route path="/register" render={(p)=>(
-				<Register {...p} setUser={this.registerUser}/>
+				<Register {...p} registerUser={this.registerUser}/>
 			)}/>
 			<Route path="/users" render={(p)=>(
 				<UserContext.Provider value={this.state.user}>

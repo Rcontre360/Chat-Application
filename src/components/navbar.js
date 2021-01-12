@@ -34,7 +34,6 @@ export const Navbar = (props)=>{
 	}
 
 	const items = [
-		{text:"Chat",logged:false,to:"/chat"},
 		{text:"Search",logged:false,to:"#"},
 		{text:"Enter Room",logged:true,to:"/users"},
 		{text:"Configuration",logged:true,to:"#"},
