@@ -1,11 +1,11 @@
 {
   "builds": [
     {
-      "src": "/api/index.js",//"/dist/apps/api/main.js",
+      "src": "/api/index.js",
       "use": "@vercel/node"
     },
     {
-      "src": "/src",//"/dist/apps/react-app/*",
+      "src": "/src",
       "use": "@now/static"
     }
   ],

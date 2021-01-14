@@ -3,6 +3,7 @@ const router = Router();
 
 const {Users,Messages} = require("../schemas");
 const {asyncHandler} = require("../error_handlers");
+const {hashPassword,confirmPassword} = require("../auth");
 
 router.get("/",asyncHandler(async (req,res)=>{
 	//const query = req.query;
@@ -29,11 +30,15 @@ router.get("/messages",asyncHandler(async (req,res)=>{
 }))
 
 router.post("/login",asyncHandler(async (req,res)=>{
-	const data = req.body;
+	const {password,name,email} = req.body;
 
-	const response = Users.find(u=>u.name===data.name && u.email===data.email && u.password===data.password)
+	const {password:hashedPassword,id} = Users.find(u=>u.name===name && u.email===email);
 
-	if (!response){
+	const passwordSuccess = await confirmPassword(password,hashedPassword);
+
+	console.log(passwordSuccess,id)
+
+	if (!passwordSuccess){
 		let err = new Error("Username, email or password incorrect");
 		err.status = 201;
 		throw err;
@@ -41,7 +46,7 @@ router.post("/login",asyncHandler(async (req,res)=>{
 
 	res.json({
 		message:"success",
-		data:response
+		data:{name,email,id}
 	});
 
 }));
@@ -57,9 +62,11 @@ router.post("/register",asyncHandler(async (req,res)=>{
 		throw err;
 	}
 
+	const password = await hashPassword(user.password);
+
 	user.room = Users.length+1;
 	user.id = Users.length+1;
-	Users.push(user);
+	Users.push({...user,password});
 	Messages.push({});
 
 	res.json({
