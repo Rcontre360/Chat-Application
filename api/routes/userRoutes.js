@@ -3,31 +3,66 @@ const router = Router();
 
 const {Users,Messages} = require("../schemas");
 const {asyncHandler} = require("../error_handlers");
-const {hashPassword,confirmPassword} = require("../auth");
+const {	hashPassword,
+		confirmPassword,
+		createToken,
+		sendAuthTokens,
+		isAuthorized,
+		isAuthorizedByCookies } = require("../auth");
 
 router.get("/",asyncHandler(async (req,res)=>{
-	//const query = req.query;
-	//const user = Users.find(u=>u.id===query.id);
+	const {id} = req.query;
+	const {data:authData} = isAuthorized(req);
+
+	if (authData.id!=id){
+		let err = new Error("Unauthorized request for users");
+		err.status = 403;
+		throw err;
+	}
+
 	res.json({
 		message:"success",
 		data:Users
-	})
+	});
 }));
 
 router.get("/messages",asyncHandler(async (req,res)=>{
 	const {id,friendId,type} = req.query;
 
-	console.log(req.query)
-	
-	const response = Messages[id-1][friendId-1];
+	const {data:authData,err} = isAuthorized(req);
 
-	console.log("response: ",Messages,id,friendId)
+	if (authData.id!=id || err){
+		let err = new Error("Unauthorized request for messages");
+		err.status = 403;
+		throw err;
+	}
+
+	const response = Messages[id-1][friendId-1];
 
 	res.json({
 		message:"success",
 		data:response
 	});
-}))
+}));
+
+router.get("/authenticate",asyncHandler(async(req,res)=>{
+	const {data:authData,err:authError} = isAuthorizedByCookies(req,res);
+	let user;
+
+	if (!authError)
+		user = Users.find(u=>u.id==authData.id);
+
+	if (authError || !user){
+		let message;
+		if (authError)
+			message = authError.message;
+		let err = new Error(message?message:"there was a problem when trying to authenticate")
+		err.status = message?403:400;
+		throw err;
+	}
+
+	sendAuthTokens(res,user);
+}));
 
 router.post("/login",asyncHandler(async (req,res)=>{
 	const {password,name,email} = req.body;
@@ -40,13 +75,13 @@ router.post("/login",asyncHandler(async (req,res)=>{
 
 	if (!passwordSuccess){
 		let err = new Error("Username, email or password incorrect");
-		err.status = 201;
+		err.status = 402;
 		throw err;
 	}
 
 	res.json({
 		message:"success",
-		data:{name,email,id}
+		data:{name,email,id,logged:true}
 	});
 
 }));
@@ -69,10 +104,7 @@ router.post("/register",asyncHandler(async (req,res)=>{
 	Users.push({...user,password});
 	Messages.push({});
 
-	res.json({
-		message:"success",
-		data:user
-	});
+	sendAuthTokens(res,user);
 }));
 
 

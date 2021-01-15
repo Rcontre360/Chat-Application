@@ -2,7 +2,7 @@ import React from "react";
 
 import {Form} from "../components/form";
 import {Chat} from "../components/chat";
-import {MessageContext} from "../contexts/mainContext";
+import {MessageContext,UserContext} from "../contexts/mainContext";
 
 import "../css/room.css";
 
@@ -36,11 +36,11 @@ export const Rooms = (props)=>{
 
 const Sidebar = (props)=>{
 	const {setUserFriend} = props;
-	const {socket} = React.useContext(MessageContext);
+	const userData = React.useContext(UserContext);
+	const {socket,get} = React.useContext(MessageContext);
 	const [userList,setUserList] = React.useState([]);
 
 	const setConnectedUser = (user,connected)=>{
-		console.log(user);
 		setUserList(prevUsers=>{
 			const index = prevUsers.findIndex(u=>
 				user.name==u.name);
@@ -53,23 +53,18 @@ const Sidebar = (props)=>{
 		})
 	}
 
-	React.useEffect(()=>{
+	React.useEffect(async ()=>{
 		let mounted = true;
 
 		const userConnectedCallback = (user)=>{
-			console.log(user);
 			setConnectedUser(user,true);
 		}
 
 		socket.on("userConnected",userConnectedCallback)
 
 		if (mounted){
-			fetch("http://localhost:3001/users")
-			.then(res=>res.json())
-			.then(res=>{
-				setUserList([...userList,...res.data]);
-			})
-			.catch(err=>console.log(err.message));
+			const response = await get("/users",userData);
+			setUserList([...response.data]);
 		}
 
 		return()=>{

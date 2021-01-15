@@ -9,7 +9,9 @@ export const UserContext = createContext({
 export const MessageContext = createContext({
 	socket:{on:(a)=>a,emit:(a)=>a},
 	room:"placeholderID",
-	setRoom:()=>"no room"
+	setRoom:()=>"no room",
+	get:(a)=>a,
+	post:(a)=>a
 })
 
 export const FriendsContext = createContext({

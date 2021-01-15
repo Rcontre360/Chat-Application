@@ -19,7 +19,15 @@ class App extends React.Component{
 		this.state = {
 			user:{name:"anonimous",logged:false},
 		}
-		this.room = "default"
+		this.room = "default";
+		this.authToken = "";
+		this.request = {
+			headers: {
+	            "Content-Type": "application/json; charset=utf-8",
+	            "Authorization":"Bearer "+this.authToken
+	        },
+			credentials: "same-origin"
+		}
 
 		this.receiveMessage = this.receiveMessage.bind(this);	
 		this.setUser = this.setUser.bind(this);
@@ -30,8 +38,12 @@ class App extends React.Component{
 		this.postMethod = this.postMethod.bind(this);
 	}
 
-	componentDidMount(){
-		this.socket = io.connect('http://localhost:3001');
+	async componentDidMount(){
+		this.socket = io.connect("/");
+		const response = await this.getMethod("/users/authenticate",{});
+		if (response.message==="success"){
+			this.setUser(response);
+		}
 	}
 
 	componentWillUnmount(){
@@ -41,11 +53,8 @@ class App extends React.Component{
 	postMethod(url,body){
 		return new Promise((resolve,reject)=>{
 			fetch(url,{
-				method: "POST", 
-	        	credentials: "same-origin",
-	        	headers: {
-	            	"Content-Type": "application/json; charset=utf-8",
-	        	},
+				method: "POST",
+				...this.request, 
 	        	body: JSON.stringify(body), //
 			}).then(res=>{
 				return res.json();
@@ -65,10 +74,7 @@ class App extends React.Component{
 		return new Promise((resolve,reject)=>{
 			fetch(url,{
 				method: "GET", 
-	        	credentials: "same-origin",
-	        	headers: {
-	            	"Content-Type": "application/json; charset=utf-8",
-	        	}
+	        	...this.request
 			}).then(res=>{
 				return res.json();
 			}).then(res=>{
@@ -85,14 +91,13 @@ class App extends React.Component{
 
 	loginUser(user){
 		return new Promise(async (resolve,reject)=>{
-			const response = await this.postMethod("http://localhost:3001/users/login",user)
+			const response = await this.postMethod("/users/login",user)
 			.catch(err=>{
 				return reject(err);
 			});
 
 			if (response.message==="success"){
-				this.setUser(response.data);
-				this.socket.emit("joinRoom",response.data);
+				this.setUser(response);
 				return resolve(user);
 			}
 
@@ -102,14 +107,13 @@ class App extends React.Component{
 
 	registerUser(user){
 		return new Promise(async (resolve,reject)=>{
-			const response = await this.postMethod("http://localhost:3001/users/register",user)
+			const response = await this.postMethod("/users/register",user)
 			.catch(err=>{
 				return reject(err);
 			});
 
 			if (response.message==="success"){
-				this.setUser(response.data);
-				this.socket.emit("joinRoom",response.data);
+				this.setUser(response);
 				return resolve(user);
 			}
 
@@ -117,8 +121,13 @@ class App extends React.Component{
 		});
 	}
 
-	setUser(user){
-		this.setState({user});
+	setUser(response){
+		const {data:user,access_token,message} = response;
+		if (message==="success"){
+			this.setState({user});
+			this.request.headers.Authorization = "Bearer "+access_token;
+			this.socket.emit("joinRoom",user);
+		}
 	}
 
 	logoutUser(){
@@ -137,7 +146,12 @@ class App extends React.Component{
 
 			<Navbar logout={this.logoutUser} logged={this.state.user.logged}/>
 
-			<Redirect to="/register"/>
+			{
+				this.state.user.logged?
+				<Redirect to="/users"/>
+				:
+				<Redirect to="/register"/>
+			}
 			<Route path="/login" render={(p)=>(
 				<Login {...p} loginUser={this.loginUser}/>
 			)}/>

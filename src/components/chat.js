@@ -66,7 +66,7 @@ export const ChatBox = (props)=>{
 		socket.on("message",listenMessage);
 
 		if (friendTarget.id!=1000){
-			const response = await get("http://localhost:3001/users/messages",{friendId:friendTarget.id,id:userData.id});
+			const response = await get("/users/messages",{friendId:friendTarget.id,id:userData.id});
 
 			if (response.data)
 				setMessages([...response.data.messages]);

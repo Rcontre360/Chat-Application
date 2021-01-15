@@ -3,6 +3,7 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 const corsConfig = require("./configuration/cors");
 const configureSocket = require("./configuration/socket");
@@ -14,7 +15,8 @@ const initServer = ()=>{
 
 	app.use(express.json());
 	app.use(express.urlencoded());
-	app.use(morgan("dev"))
+	app.use(cookieParser());
+	app.use(morgan("dev"));
 	app.use(cors(corsConfig));
 	app.use(routes);
 	app.all("*",notFoundHandler);
