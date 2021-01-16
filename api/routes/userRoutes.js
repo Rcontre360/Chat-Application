@@ -117,17 +117,21 @@ router.post("/register",asyncHandler(async (req,res)=>{
 	sendAuthTokens(res,user);
 }));
 
-/*router.post("/update",asyncHandler(async (req,res)=>{
+router.post("/update",asyncHandler(async (req,res)=>{
 	const {id} = req.body;
-	const {data:authData,err} = isAuthorized(req);
+	const {data:authData,authError} = isAuthorized(req);
 
-	if (authData.id!=id || err){
-		let err = new Error("Unauthorized request for messages");
+	if (authData.id!=id || authError){
+		let err = new Error("Unauthorized request for update");
 		err.status = 403;
 		throw err;
 	}
 
-}));*/
+	const userIndex = Users.findIndex(u=>u.id==id);
+	Users[userIndex] = {...Users[userIndex],...req.body};
+
+	sendAuthTokens(res,Users[userIndex]);
+}));
 
 
 module.exports = router;

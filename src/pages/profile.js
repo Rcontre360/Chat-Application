@@ -79,7 +79,6 @@ const dataInitialState = {
 }
 
 const reducer = (state,action)=>{
-	console.log(action)
 	let form = []
 	switch (action){
 		case "name":
@@ -104,7 +103,7 @@ const reducer = (state,action)=>{
 
 const Data = (props)=>{
 	const [{popActive,formList},dispatch] = React.useReducer(reducer,dataInitialState);
-	const {name,email,id,updateUserData} = React.useContext(UserContext);
+	const {name,email,id,updateUserData,setUser} = React.useContext(UserContext);
 
 	const newUserData = {}
 
@@ -120,9 +119,9 @@ const Data = (props)=>{
 	}
 
 	const sendFormData = async ()=>{
-		const response = await updateUserData(newUserData);
+		const response = await updateUserData({...newUserData,id});
 		if (response.message==="success"){
-			console.log(response)
+			setUser(response);
 			dispatch("disable");
 		}
 	}
@@ -138,7 +137,7 @@ const Data = (props)=>{
 		items.map((el,i)=>{
 			const {main,text,setFunction,type} = el;
 			return (
-			<div className="data-option">
+			<div key={i} className="data-option">
 				<span>{main}</span>
 				<p>{text}</p>
 				<button onClick={()=>dispatch(type)}>Change</button>

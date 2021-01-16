@@ -5,7 +5,8 @@ export const UserContext = createContext({
 	email:"anonimous@gmail.com",
 	logged:false,
 	id:1000,
-	updateUserData:()=>1
+	updateUserData:()=>1,
+	setUser:()=>1,
 });
 
 export const MessageContext = createContext({

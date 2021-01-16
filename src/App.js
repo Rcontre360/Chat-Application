@@ -205,7 +205,8 @@ class App extends React.Component{
 			)}/>
 			<UserContext.Provider value={{
 				...this.state.user,
-				updateUserData:this.updateUserData
+				updateUserData:this.updateUserData,
+				setUser:this.setUser,
 			}}>
 
 				<Route path="/profile" render={p=>(
