@@ -14,13 +14,13 @@
 
 	.navbar #dropdown{
 		display: block;
-		background:var(--darkDark-1);
-		color:var(--darkClear-1);
+		background:var(--color-back-3);
+		color:var(--color-primary);
 	}
 
 	.navbar #dropdown-toggled{
-		background:var(--darkClear-1);
-		color:var(--darkDark-1);
+		background:var(--color-primary);
+		color:var(--color-back-3);
 		width: 20px;
 	}
 
@@ -61,42 +61,48 @@
 }
 
 :root {
-  --darkGreen:#51BD8A;
-  --darkClear-1: #C2CBEA;
-  --darkBack-1:#3E485F;
-  --darkBack-2:#022A3F;
-  --darkDark-1: #0C152B;
-  --darkDark-2:#115268;
+  --color-secondary:#51BD8A;
+  --color-primary: #C2CBEA;
+  --color-back-1:#3E485F;
+  --color-back-2:#022A3F;
+  --color-back-3: #0C152B;
+  --color-back-4:#115268;
   --wLarge:900px;
   --wMid:600px;
   --wSmall:300px;
 }
 
 body{
-	background:var(--darkBack-1);
-	color:var(--darkClear-1);
+	background:var(--color-back-1);
+	color:var(--color-primary);
 	font-family: 'Quicksand', sans-serif;
 }
 
+a:link, a:visited, li{
+	color:var(--color-primary);
+	text-decoration: none;
+	list-style-type:none;
+}
+
 ::-webkit-scrollbar{
-	background: var(--darkDark-2);
+	background: var(--color-back-4);
 	border-radius: 10px;
 	width:10px;
 }
 
 ::-webkit-scrollbar-button{
 	border-radius: 5px 5px 0px 0px;
-	background: var(--darkClear-1);
+	background: var(--color-primary);
 }
 
 ::-webkit-scrollbar-thumb{
-	background: var(--darkGreen);
+	background: var(--color-secondary);
 }
 
 .app-message{
-	background: var(--darkBack-2);
+	background: var(--color-back-2);
 	padding:20px 50px;
-	border:solid var(--darkGreen) 2px;
+	border:solid var(--color-secondary) 2px;
 	border-radius: 20px;
 	margin:0px 0px 20px 0px;
 }
@@ -105,4 +111,27 @@ body{
 	font-size: 20px;
 }
 
+.popupWindow-blur{
+	position: absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height: 100%;
+	z-index: 200;
+	background: rgba(100,100,100,0.5);
+	filter:blur(20px);
+	-webkit-filter:blur(20px);
+}
+
+.popupWindow{
+	position:absolute;
+	transform:translate(50%,-50%);
+	right:50%;
+	top:50%;
+	background: var(--color-back-3);
+	padding: 2vw;
+	border:solid var(--color-secondary) 5px;
+	border-radius: 10px;
+	z-index: 300;
+}
 

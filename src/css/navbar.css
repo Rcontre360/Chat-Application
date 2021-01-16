@@ -7,10 +7,10 @@
 	top:0px;
 	right:0px;
 	left:0px;
-	background:var(--darkDark-1);
-	color:var(--darkClear-1);
+	background:var(--color-back-3);
+	color:var(--color-primary);
 	padding:0px 30px;
-	z-index: 500;
+	z-index: 100;
 }
 
 .navbar .navbar-title{
@@ -22,23 +22,13 @@
 	margin:0px;
 }
 
-.navbar .navbar-li:hover{
-	background: var(--darkClear-1);
-	color:var(--darkDark-1);
+.navbar .navbar-li:hover >*, .navbar .navbar-li:hover{
+	background: var(--color-primary);
+	color:var(--color-back-3);
 }
 
 .navbar .navbar-li{
 	padding:20px;
-	list-style-type:none;
-}
-
-.navbar .navbar-link:link, .navbar .navbar-link:visited{
-	color:var(--darkClear-1);
-	text-decoration: none;
-}
-
-.navbar .navbar-link:hover{
-	color:var(--darkDark-1);
 }
 
 .navbar #dropdown{

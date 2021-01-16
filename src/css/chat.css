@@ -7,7 +7,7 @@
 }
 
 .chatBox{
-	background: var(--darkDark-1);
+	background: var(--color-back-3);
 	width: 50%;
 	max-width: 400px;
 	min-width: 250px;
@@ -69,7 +69,7 @@
 }
 
 .chatBox-foot form input{
-	background: var(--darkDark-2);
+	background: var(--color-back-4);
 	color:lightgrey;
 	font-size:15px;
 	padding:0px 6px;
@@ -80,7 +80,7 @@
 }
 
 .chatBox-foot form input::placeholder{
- 	color:var(--darkClear-1);
+ 	color:var(--color-primary);
  	transition:1s;
  }
 
@@ -91,10 +91,10 @@
 }
 
 .chatBox-foot form button{
-	background:var(--darkGreen);
+	background:var(--color-secondary);
 	font-size:15px;
 	padding:0px 6px;
-	border:outset 3px var(--darkGreen);
+	border:outset 3px var(--color-secondary);
 	border-radius:5px;
 	margin:auto;
 	color:white;
@@ -103,6 +103,6 @@
 
 .chatBox-foot form button:active{
 	background: #217C50;
-	border:inset 3px var(--darkGreen);
+	border:inset 3px var(--color-secondary);
 	color:lightgrey;
 }

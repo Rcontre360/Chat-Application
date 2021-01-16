@@ -28,7 +28,6 @@ export const Login = (props)=>{
 	}
 
 	const sendUserData = (e)=>{
-		e.preventDefault();
 		loginUser({...userData,logged:true})
 		.then(res=>{
 			history.push("/users");

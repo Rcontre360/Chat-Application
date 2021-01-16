@@ -20,9 +20,13 @@ router.get("/",asyncHandler(async (req,res)=>{
 		throw err;
 	}
 
+	const response = Users.map(u=>{
+		return {name:u.name,email:u.email,id:u.id}
+	});
+
 	res.json({
 		message:"success",
-		data:Users
+		data:response
 	});
 }));
 
@@ -49,7 +53,7 @@ router.get("/authenticate",asyncHandler(async(req,res)=>{
 	const {data:authData,err:authError} = isAuthorizedByCookies(req,res);
 	let user;
 
-	if (!authError)
+	if (!authError && authData)
 		user = Users.find(u=>u.id==authData.id);
 
 	if (authError || !user){
@@ -57,11 +61,20 @@ router.get("/authenticate",asyncHandler(async(req,res)=>{
 		if (authError)
 			message = authError.message;
 		let err = new Error(message?message:"there was a problem when trying to authenticate")
-		err.status = message?403:400;
+		err.status = message?403:401;
 		throw err;
 	}
 
 	sendAuthTokens(res,user);
+}));
+
+router.get("/logout",asyncHandler(async(req,res)=>{
+	const query = req.query;
+	console.log("reached")
+	res.clearCookie("refresh_token",{path:"/"});
+	res.json({
+		message:"success"
+	});
 }));
 
 router.post("/login",asyncHandler(async (req,res)=>{
@@ -79,10 +92,7 @@ router.post("/login",asyncHandler(async (req,res)=>{
 		throw err;
 	}
 
-	res.json({
-		message:"success",
-		data:{name,email,id,logged:true}
-	});
+	sendAuthTokens(res,{password,name,email,id});
 
 }));
 
@@ -106,6 +116,18 @@ router.post("/register",asyncHandler(async (req,res)=>{
 
 	sendAuthTokens(res,user);
 }));
+
+/*router.post("/update",asyncHandler(async (req,res)=>{
+	const {id} = req.body;
+	const {data:authData,err} = isAuthorized(req);
+
+	if (authData.id!=id || err){
+		let err = new Error("Unauthorized request for messages");
+		err.status = 403;
+		throw err;
+	}
+
+}));*/
 
 
 module.exports = router;

@@ -34,12 +34,12 @@ const sendAuthTokens =asyncHandler(async (res,user)=>{
 	const accessToken = await createToken({
 		id:user.id,
 		name:user.name
-	},2,process.env.ACCESS_JWT);
+	},HOUR/1000,process.env.ACCESS_JWT);
 	
 	const refreshToken = await createToken({
 		id:user.id,
 		name:user.name
-	},HOUR/10,process.env.REFRESH_JWT);
+	},HOUR/1000*24*3,process.env.REFRESH_JWT);
 
 	res.cookie("refresh_token",refreshToken,{
 		httpOnly:true,
@@ -49,7 +49,11 @@ const sendAuthTokens =asyncHandler(async (res,user)=>{
 
 	res.json({
 		message:"success",
-		data:user,
+		data:{
+			name:user.name,
+			id:user.id,
+			email:user.email
+		},
 		access_token:accessToken,
 	});
 });

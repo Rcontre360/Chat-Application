@@ -1,0 +1,122 @@
+.profile{
+	display: flex;
+	padding-top:90px;
+	width: 100%;
+}
+.profile-user{
+	background: var(--color-back-3);
+	flex:4;
+	margin:0px 40px;
+	display: flex;
+	flex-direction: column;
+	box-shadow:0px 1px 10px black;
+}
+
+.profile-user .user-image{
+	background-size:cover;	
+	background-repeat: no-repeat;
+	background-position: center;
+	height:30vw;
+}
+
+.profile-user .profile-content{
+	padding:20px;
+}
+
+.profile-user .profile-name{
+	position:relative;
+	text-transform: capitalize;
+}
+
+.profile-user .profile-email{
+	position:relative;
+}
+
+.profile-account{
+	flex:6;
+	display:flex;
+	flex-direction: column;
+	margin-right:40px;
+}
+
+.profile-account .title{
+	font-size:40px;
+	border-bottom: solid var(--color-back-3) 2px;
+}
+
+.account-nav ul{
+	display:flex;
+	box-shadow:0px 1px 5px black; 
+}
+
+.account-nav .navbar-li{
+	padding: 10px 0px;
+	flex-grow: 1;
+	text-align: center;
+}
+
+.account-nav .navbar-li a{
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.account-nav .navbar-li:hover,
+.account-nav .navbar-li:hover >*{
+	background: var(--color-back-3);
+	color: var(--color-primary);
+}
+
+.profile-account .profile-content{
+	padding-top:20px;
+}
+
+.profile-data .data-option{
+	display: flex;
+	justify-content: space-between;
+	padding: 20px;
+}
+
+.data-option span,.data-option p{
+	flex:1;
+}
+
+.profile-data .data-option button{
+	background: var(--color-secondary);
+	padding: 5px 10px;
+	border-radius: 10px;
+	border:outset var(--color-secondary) 3px;
+	outline: none;
+}
+
+.profile-data .data-option button:active{
+	background: lightgreen;
+	border:inset var(--color-secondary) 3px;
+}
+
+.profile-config .config-option {
+	display: flex;
+	align-items: center;
+	padding: 10px 0px;
+}
+
+.profile-config span{
+	flex:3;
+}
+
+.profile-config button{
+	background: transparent;
+	border:none;
+	flex:1;
+	text-align: center;
+	font-size: 25px;
+	margin-right: 10vw;
+	outline: none;
+} 
+
+.profile-config i{
+	color:var(--color-primary);
+}
+
+.profile-config .fa-toggle-on{
+	color:var(--color-secondary);
+}

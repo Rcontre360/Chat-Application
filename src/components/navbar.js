@@ -3,7 +3,7 @@ import {Link} from "react-router-dom";
 
 import "../css/navbar.css";
 
-const ListItem = (props)=>{
+export const ListItem = (props)=>{
 	let {text,to,onClick} = props;
 
 	if (!onClick) 
@@ -34,12 +34,11 @@ export const Navbar = (props)=>{
 	}
 
 	const items = [
-		{text:"Search",logged:false,to:"#"},
-		{text:"Enter Room",logged:true,to:"/users"},
-		{text:"Configuration",logged:true,to:"#"},
-		{text:"Login",logged:false,to:"/login"},
-		{text:"Logout",logged:true,to:"/login",onClick:logout},
-		{text:"Register",logged:false,to:"/register"}
+		{text:"Profile",logged:true,to:"/profile/"},
+		{text:"Enter Room",logged:true,to:"/users/"},
+		{text:"Login",logged:false,to:"/login/"},
+		{text:"Logout",logged:true,to:"/login/",onClick:logout},
+		{text:"Register",logged:false,to:"/register/"}
 	]
 	
 	return(

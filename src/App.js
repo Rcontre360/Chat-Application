@@ -5,7 +5,11 @@ import {Navbar} from "./components/navbar";
 import {Rooms} from "./pages/rooms";
 import {Login} from "./pages/login";
 import {Register} from "./pages/register";
-import {MessageContext,UserContext} from "./contexts/mainContext";
+import {Profile} from "./pages/profile";
+import {MessageContext,
+		UserContext,
+		ConfigurationContext
+		} from "./contexts/mainContext";
 
 import "./css/main.css";
 
@@ -17,25 +21,43 @@ class App extends React.Component{
 		super(props);
 
 		this.state = {
-			user:{name:"anonimous",logged:false},
+			user:{	
+				name:"anonimous",
+				logged:false,
+				email:"anonimous@gmail.com"
+			},
+			colorMode:"dark",
 		}
-		this.room = "default";
-		this.authToken = "";
+		this.configuration = {
+			room:"default",
+			authToken:"",
+			storeOnDevise:true
+		}
 		this.request = {
 			headers: {
 	            "Content-Type": "application/json; charset=utf-8",
-	            "Authorization":"Bearer "+this.authToken
+	            "Authorization":"Bearer "+this.configuration.authToken
 	        },
 			credentials: "same-origin"
 		}
+		this.colors = {
+			"--color-primary":{dark:"#C2CBEA",light:"#203A3B"},
+			"--color-secondary":{dark:"#51BD8A",light:"#79B6D7"},
+			"--color-back-1":{dark:"#3E485F",light:"#DCEDEE"},
+			"--color-back-2":{dark:"#022A3F",light:"#B7DADB"},
+			"--color-back-3":{dark:"#0C152B",light:"#EEF5F5"},
+			"--color-back-4":{dark:"#115268",light:"#CADCDD"}
+		}
 
-		this.receiveMessage = this.receiveMessage.bind(this);	
 		this.setUser = this.setUser.bind(this);
 		this.loginUser = this.loginUser.bind(this);
 		this.registerUser = this.registerUser.bind(this);
 		this.logoutUser = this.logoutUser.bind(this);
 		this.getMethod = this.getMethod.bind(this);
 		this.postMethod = this.postMethod.bind(this);
+		this.setColorMode = this.setColorMode.bind(this);
+		this.storeAccount = this.storeAccount.bind(this);
+		this.updateUserData = this.updateUserData.bind(this);
 	}
 
 	async componentDidMount(){
@@ -43,11 +65,16 @@ class App extends React.Component{
 		const response = await this.getMethod("/users/authenticate",{});
 		if (response.message==="success"){
 			this.setUser(response);
+			console.log(this.state)
 		}
+		this.setColorMode();
 	}
 
 	componentWillUnmount(){
 		//this.socket.disconnect({...this.state.user,room:this.room});
+		if (!this.configuration.storeOnDevise){
+			this.logoutUser();
+		}
 	}
 
 	postMethod(url,body){
@@ -124,19 +151,37 @@ class App extends React.Component{
 	setUser(response){
 		const {data:user,access_token,message} = response;
 		if (message==="success"){
-			this.setState({user});
+			this.setState({user:{...user,logged:true}});
 			this.request.headers.Authorization = "Bearer "+access_token;
 			this.socket.emit("joinRoom",user);
 		}
 	}
 
-	logoutUser(){
+	async logoutUser(){
+		const res = await this.getMethod("/users/logout",this.state.user);
+		console.log(res);
 		const user = {name:"anonimous",logged:false};
-		this.setState({user})
+		this.setState({user});
+		this.request.headers.Authorization = "Bearer "+"invalid_token";
 	}
 
-	receiveMessage(otherUser,message){
+	setColorMode(){
+		const mode = this.state.colorMode==="dark"?"light":"dark";
+		const mainStyle = document.querySelector(":root").style;
+		for (let key in this.colors)
+			mainStyle.setProperty(key,this.colors[key][mode]);
+		this.setState({colorMode:mode});
+	}
 
+	storeAccount(){
+		this.configuration.storeOnDevise = !this.configuration.storeOnDevise;
+	}
+
+	updateUserData(newUser){
+		return new Promise(async (resolve,reject)=>{
+			const response = await this.postMethod("/users/update",newUser);
+			resolve(response);
+		});
 	}
 
 	render(){
@@ -150,21 +195,36 @@ class App extends React.Component{
 				this.state.user.logged?
 				<Redirect to="/users"/>
 				:
-				<Redirect to="/register"/>
+				<Redirect to="/login"/>
 			}
-			<Route path="/login" render={(p)=>(
+			<Route path="/login" render={p=>(
 				<Login {...p} loginUser={this.loginUser}/>
 			)}/>
-			<Route path="/register" render={(p)=>(
+			<Route path="/register" render={p=>(
 				<Register {...p} registerUser={this.registerUser}/>
 			)}/>
-			<Route path="/users" render={(p)=>(
-				<UserContext.Provider value={this.state.user}>
-				<MessageContext.Provider value={{socket:this.socket,get:this.getMethod}}>
-					<Rooms {...p}/>
-				</MessageContext.Provider>
-				</UserContext.Provider>
-			)}/>
+			<UserContext.Provider value={{
+				...this.state.user,
+				updateUserData:this.updateUserData
+			}}>
+
+				<Route path="/profile" render={p=>(
+					<ConfigurationContext.Provider value=
+					{{
+						setColorMode:this.setColorMode,
+						storeAccount:this.storeAccount,
+					}}>
+						<Profile {...p}/>
+					</ConfigurationContext.Provider>
+				)}/>
+				<Route path="/users" render={p=>(
+				
+					<MessageContext.Provider value={{socket:this.socket,get:this.getMethod}}>
+						<Rooms {...p}/>
+					</MessageContext.Provider>
+				
+				)}/>
+			</UserContext.Provider>
 
 		</BrowserRouter>
 		);
