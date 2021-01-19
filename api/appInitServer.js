@@ -2,7 +2,7 @@ require("dotenv/config");
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
-const morgan = require("morgan");
+//const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const path = require('path');
 
@@ -17,7 +17,7 @@ const initServer = ()=>{
 	app.use(express.json());
 	app.use(express.urlencoded());
 	app.use(cookieParser());
-	app.use(morgan("dev"));
+	//app.use(morgan("dev"));
 	app.use(cors(corsConfig));
 
 	if(process.env.NODE_ENV === 'production') {  
