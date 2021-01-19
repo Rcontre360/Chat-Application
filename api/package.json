@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "scripts": {   
+    "client-install": "npm install --prefix client",
+    "start": "node index.js",    
+    "server": "nodemon index.js",    
+    "client": "npm start --prefix client",    
+    "dev": "concurrently \"npm run api\" \"npm run client\""
   },
   "keywords": [],
   "author": "",

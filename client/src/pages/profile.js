@@ -102,7 +102,7 @@ const reducer = (state,action)=>{
 }
 
 const Data = (props)=>{
-	const [{popActive,formList},dispatch] = React.useReducer(reducer,dataInitialState);
+	const [{popActive,formList,showMessage},dispatch] = React.useReducer(reducer,dataInitialState);
 	const {name,email,id,updateUserData,setUser} = React.useContext(UserContext);
 
 	const newUserData = {}
@@ -123,12 +123,17 @@ const Data = (props)=>{
 		if (response.message==="success"){
 			setUser(response);
 			dispatch("disable");
+		} else {
+			console.log(response)
 		}
 	}
 
 	return(
 	<div className="profile-data">
 	<PopUp active={popActive}>
+	{
+		showMessage && <Message/>
+	}
 		<div className="form">
 		<Form onSendData={sendFormData.bind(this)} onChangeValue={setFormData.bind(this)} elements={formList}/>
 		</div>
