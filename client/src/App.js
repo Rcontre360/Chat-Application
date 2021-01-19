@@ -26,10 +26,9 @@ class App extends React.Component{
 				logged:false,
 				email:"anonimous@gmail.com"
 			},
-			colorMode:"dark",
+			colorMode:"light",
 		}
 		this.configuration = {
-			room:"default",
 			authToken:"",
 			storeOnDevise:true
 		}
@@ -86,8 +85,10 @@ class App extends React.Component{
 			}).then(res=>{
 				return res.json();
 			}).then(res=>{
+				//console.log("postRes: ",url,body,res)
 				resolve(res);
 			}).catch(err=>{
+				//console.log("postError: ",url,body,err.message)
 				reject(err);
 			});
 		});
@@ -105,8 +106,10 @@ class App extends React.Component{
 			}).then(res=>{
 				return res.json();
 			}).then(res=>{
+				//console.log("getRes: ",url,query,res)
 				resolve(res);
 			}).catch(err=>{
+				//console.log("getError: ",url,query,err.message)
 				reject(err);
 			});
 		});
@@ -151,6 +154,7 @@ class App extends React.Component{
 	setUser(response){
 		const {data:user,access_token,message} = response;
 		if (message==="success"){
+			this.configuration.room = user.room;
 			this.setState({user:{...user,logged:true}});
 			this.request.headers.Authorization = "Bearer "+access_token;
 			this.socket.emit("joinRoom",user);
@@ -159,7 +163,10 @@ class App extends React.Component{
 
 	async logoutUser(){
 		const res = await this.getMethod("/users/logout",this.state.user);
-		console.log(res);
+		this.socket.emit("leaveRoom",{
+			room:this.configuration.room,
+			user:this.state.user
+		});
 		const user = {name:"anonimous",logged:false};
 		this.setState({user});
 		this.request.headers.Authorization = "Bearer "+"invalid_token";
@@ -187,7 +194,7 @@ class App extends React.Component{
 	render(){
 
 		return(
-		<BrowserRouter>
+		<BrowserRouter basename="/React">
 
 			<Navbar logout={this.logoutUser} logged={this.state.user.logged}/>
 

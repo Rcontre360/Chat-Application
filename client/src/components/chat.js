@@ -55,15 +55,20 @@ export const ChatBox = (props)=>{
 
 	React.useEffect(async ()=>{
 		//retrieve messages from db
+
 		let mounted = true;
 		const listenMessage = (data)=>{
 			const {user,message} = data;
-			console.log({user,friendTarget});
+			console.log("message arrived: ",{user,friendTarget});
 			if (mounted && user.id==friendTarget.id)
 				addMessage({message,fromUser:"arrive"});
 		}
 
+		console.log("useEffect")
+		socket.off("message");
 		socket.on("message",listenMessage);
+
+		console.log(socket)
 
 		if (friendTarget.id!=1000){
 			const response = await get("/users/messages",{friendId:friendTarget.id,id:userData.id});
@@ -74,11 +79,7 @@ export const ChatBox = (props)=>{
 				setMessages([]);
 		}
 
-		return ()=>{
-			socket.off("message",listenMessage);
-		}
-
-	},[friendTarget]);
+	},[friendTarget,socket]);
 
 	return(
 		<div className="chatBox">

@@ -11,22 +11,22 @@ const configureSocket = (server)=>{
 	io.on('connection',(socket) => {
 
 		socket.on("joinRoom",(data)=>{
-			const {room,name,id,email} = data;
+			const {name,id,email} = data;
 
 			console.log("joinRoom",data)
 
-			socket.join(room);
+			socket.join(id);
 			console.log("connect to: ",name,email,id)
 			socket.broadcast.emit("userConnected",{name,email,id,logged:true});
 
 		});
 
 		socket.on("leaveRoom",(data)=>{
-			const {room,user} = data;
+			const {id,name} = data;
 			console.log("leaveRoom",data)
 
-			socket.broadcast.to(room).emit("sistem-message",{message:user.name+" has leaved the room"});
-			socket.leave(room);
+			socket.broadcast.to(id).emit("sistem-message",{message:name+" has leaved the room"});
+			socket.leave(id);
 
 		});
 

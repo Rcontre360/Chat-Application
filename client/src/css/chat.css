@@ -70,7 +70,7 @@
 
 .chatBox-foot form input{
 	background: var(--color-back-4);
-	color:lightgrey;
+	color:var(--color-primary);
 	font-size:15px;
 	padding:0px 6px;
 	border:inset grey 2px;

@@ -39,5 +39,6 @@
     "concurrently":"^5.3.0"
   },
   "author":"Rafael Eduardo Contreras",
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "homepage": "http://localhost:3001/"
 }

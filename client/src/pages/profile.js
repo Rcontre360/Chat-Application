@@ -174,7 +174,10 @@ const Configuration = (props)=>{
 	React.useEffect(()=>{
 		setItems(prevItems=>{
 			return prevItems = prevItems.map(el=>{
-				el.toggle = false;
+				if (el.text==="Dark mode")
+					el.toggle = true;
+				else
+					el.toggle = false;
 				return el;
 			});
 		});
