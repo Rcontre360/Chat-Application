@@ -12,7 +12,8 @@
     "web-vitals": "^0.2.4",
     "react-router-dom":"^5.2.0",
     "axios":"^0.21.0",
-    "socket.io-client":"^3.0.4"
+    "socket.io-client":"^3.0.4",
+    "validator":"^13.5.2"
   },
   "scripts": {
     "start": "react-scripts start",

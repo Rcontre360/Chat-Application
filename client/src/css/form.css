@@ -9,15 +9,17 @@
 .form{
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 }
 
 .form h1{
 	text-align: center;
 	font-size:40px;
+	margin-bottom: 15px;
 }
 
 .form form{
-	padding: 20px;
+	padding: 10px;
 	display: flex;
 	flex-direction: column;
 	font-size:20px;
@@ -51,7 +53,7 @@
 
 .form .input-wrapper input:focus + label{
 	font-size:21px;
-	color:white;
+	color:var(--color-secondary);
 	transition:0.5s;
 }
 
@@ -67,20 +69,8 @@
 }
 
 .form .input-wrapper button{
-	background:var(--color-secondary);
 	padding:10px 30px;
-	border:outset 3px var(--color-secondary);
-	border-radius:20px;
 	margin:auto;
-	font-weight: bolder;
-	color:white;
-	outline: none;
-}
-
-.form .input-wrapper button:active{
-	background: #217C50;
-	border:inset 3px var(--color-secondary);
-	color:lightgrey;
 }
 
 

@@ -2,6 +2,8 @@ import React from "react";
 
 import {Form} from "../components/form";
 import {Chat} from "../components/chat";
+import {LinkItem} from "../components/navbar";
+import {UserElement,UserPhoto} from "../components/user";
 import {MessageContext,UserContext} from "../contexts/mainContext";
 
 import "../css/room.css";
@@ -18,25 +20,89 @@ const sidebarForm=[
 
 export const Rooms = (props)=>{
 	const {history} = props;
-	const [userFriend,setUserFriend] = React.useState({
-		name:"anonimous",
-		id:1000,
-		type:"no-valid"
-	});
+	const userData = React.useContext(UserContext);
+	const [userFriend,setUserFriend] = React.useState({});
+
+	let currentPlaceholder = <UserPlaceholder {...userFriend} user={{...userData}}/>;
+	if (userData.friends.find(friends=>friends.id===userFriend.id))
+		currentPlaceholder = <Chat friendTarget={userFriend} {...props}/>
+
 
 	return(
 	<div className="room-wrapper">
-		<Sidebar setUserFriend={setUserFriend.bind(this)}/>
+		<Sidebar userData={userData} setUserFriend={setUserFriend.bind(this)}/>
 		<div className="main">
-			<Chat friendTarget={userFriend} {...props}/>
+		{userFriend.id?
+
+			currentPlaceholder
+			:
+			<InitialPlaceholder name={userData.name}/>
+		}
 		</div>
 	</div>
 	)
 }
 
+const Placeholder = (props)=>{
+	const {name,title,subtitle} = props;
+
+	return(
+	<div className="placeholder">
+		<div className="placeholder-title">
+			<h2>{title}</h2>
+			<p>{subtitle}</p>
+		</div>
+		{props.children}
+	</div>
+	);
+}
+
+const InitialPlaceholder = (props)=>{
+	const {name} = props;
+
+	const stepsList = [
+	{text:"1 - Search for your friend"},
+	{text:"2 - Send a request to save your contact"},
+	{text:"3 - Click your contact on the sidebar"},
+	{text:"4 - Start sending messages to each other"}
+	];
+
+	return(
+		<Placeholder title={"Welcome "+name} subtitle={"choose and find your contacts to chat!"}>
+			<div className="placeholder-body">
+			<h3 className="steps-title">Steps to begin chat:</h3>
+			<ul className="steps">
+			{
+				stepsList.map((step,id)=><LinkItem key={id} {...step}/>)
+			}
+			</ul>
+		</div>
+		</Placeholder>
+	);
+}
+
+const UserPlaceholder = (props)=>{
+	const {socket} = React.useContext(MessageContext);
+	const {id:friendId,name:friendName,email:friendEmail} = props;
+	const {user} = props;
+
+	const sendFriendRequest = ()=>{
+		socket.emit("friendRequest",{friendId,id:user.id});
+	}
+
+	return(
+		<Placeholder title={friendName} subtitle={"send a friend request to chat with this contact!"}>
+			<UserPhoto image={"http://localhost:3000/images/user_placeholder.jpg"} logged={true} size={200}/>
+			<p className="email">{friendEmail}</p>
+			<button className="send-request" onClick={sendFriendRequest}>
+				Send request!
+			</button>
+		</Placeholder>
+	);
+}
+
 const Sidebar = (props)=>{
-	const {setUserFriend} = props;
-	const userData = React.useContext(UserContext);
+	const {setUserFriend,userData} = props;
 	const {socket,get} = React.useContext(MessageContext);
 	const [userList,setUserList] = React.useState([]);
 
@@ -44,7 +110,6 @@ const Sidebar = (props)=>{
 		setUserList(prevUsers=>{
 			const index = prevUsers.findIndex(u=>
 				user.name==u.name);
-			console.log(index)
 			if (index==-1)
 				return [...prevUsers,user];
 			
@@ -59,8 +124,8 @@ const Sidebar = (props)=>{
 		const userConnectedCallback = (user)=>{
 			setConnectedUser(user,true);
 		}
-
-		socket.on("userConnected",userConnectedCallback)
+		if (socket)
+			socket.on("userConnected",userConnectedCallback)
 
 		if (mounted){
 			const response = await get("/users",userData);
@@ -71,7 +136,7 @@ const Sidebar = (props)=>{
 			socket.off("userConnected",userConnectedCallback);
 		}
 
-	},[]);
+	},[socket]);
 
 	return(
 	<aside className="sidebar">
@@ -84,34 +149,12 @@ const Sidebar = (props)=>{
 		<div className="sidebar-body">
 		{
 			userList  &&	userList.map((el,id)=>{
+				if (el.id===userData.id)
+					return <React.Fragment key={id}></React.Fragment>
 				return <UserElement onClick={setUserFriend} {...el} key={id}/>
 			})
 		}
 		</div>
 	</aside>
-	);
-}
-
-const UserElement = (props)=>{
-	let {name,logged,image,id,onClick} = props;
-
-	if (!image)
-		image="images/placeholder.png";
-
-	return(
-	<div className="user" onClick={()=>onClick({name,id})}>
-		<UserPhoto image={image} logged={logged}/>
-		<p className="user-name" >{name}</p>
-	</div>
-	);
-}
-
-const UserPhoto = (props)=>{
-	const {image,logged} = props;
-	const border=logged?"solid var(--darkGreen) 3px":"";
-
-	return(
-	<div className="user-photo" style={{backgroundImage:"url("+image+")",border}}>
-	</div>
 	);
 }

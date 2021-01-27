@@ -2,7 +2,7 @@ const {v4} = require("uuid");
 
 const corsConfig = require("./cors");
 const {Users,Messages} = require("../schemas");
-const {asyncHandler} = require("../error_handlers");
+const {asyncHandler,throwCustomError} = require("../error_handlers");
 
 const configureSocket = (server)=>{
 
@@ -17,19 +17,18 @@ const configureSocket = (server)=>{
 
 			console.log("joinRoom",data);
 
-			socket.join(id);
-			console.log("connect to: ",name,email,id)
+			const {room} = await Users.findById(id,{room:1});
+			socket.join(room);
 			socket.broadcast.emit("userConnected",{name,email,id,logged:true});
 
 		}));
 
 		socket.on("leaveRoom",asyncHandler(async (data)=>{
-			const {id,name} = data;
+			const {id} = data;
 			console.log("leaveRoom",data);
 
-			socket.broadcast.to(id).emit("sistem-message",{message:name+" has leaved the room"});
-			socket.leave(id);
-
+			const {room} = await Users.findById(id,{room:1});
+			socket.leave(room);
 		}));
 
 		socket.on("message",asyncHandler(async (data)=>{
@@ -73,9 +72,78 @@ const configureSocket = (server)=>{
 
 			setUserMessage(user.id,friend.id,message,true);
 			setUserMessage(friend.id,user.id,message,false);
-			
+
 			const {room} = await Users.findById(friend.id);
 			socket.broadcast.to(room).emit("message",{user,message});
+		}));
+
+		socket.on("friendRequest",asyncHandler(async (data)=>{
+			console.log("friendRequest",data)
+			const {id,friendId} = data;
+
+			const userDoc = await Users.findById(id);
+			const friendDoc = await Users.findById(friendId);
+			const {name,email} = userDoc;
+			const {name:friendName,email:friendEmail} = friendDoc;
+
+			userDoc.friendRequests.sent.push({
+				id:friendId,
+				name:friendName,
+				email:friendEmail
+			});
+			friendDoc.friendRequests.received.push({
+				id,
+				name,
+				email
+			});
+
+			userDoc.save();
+			friendDoc.save();
+
+			const {room} = await Users.findById(friendId);
+			socket.broadcast.to(room).emit("friendRequest",{
+				name,email,id
+			});
+		}));
+
+		socket.on("acceptFriendRequest",asyncHandler(async (data)=>{
+			console.log("acceptFriendRequest",data)
+			const {id,friendId} = data;
+
+			const friendDoc = await Users.findById(friendId);
+			const existFriendRequest = friendDoc.friendRequests.sent.find(user=>{
+				console.log(user.id,id);
+				return user.id===id
+			});
+			const isAlreadyFriend = friendDoc.friends.find(friend=>friend.id===id);
+
+			if (!existFriendRequest || isAlreadyFriend)
+				throwCustomError({
+					msg:"You cannot accept this friend request",
+					param:"",
+					status:401
+				});
+			
+			const userDoc = await Users.findById(id);
+			const {name,email} = userDoc;
+			userDoc.friends.push({
+				id:friendId,
+				name:friendDoc.name,
+				email:friendDoc.email
+			});
+			userDoc.save();
+
+			friendDoc.friends.push({
+				id,
+				name:userDoc.name,
+				email:userDoc.email
+			});
+			friendDoc.save();
+
+			const {room} = await Users.findById(friendId);
+			socket.broadcast.to(room).emit("acceptFriendRequest",{
+				name,email,id
+			});
 		}));
 
 		socket.on("disconnect",(data,other)=>{

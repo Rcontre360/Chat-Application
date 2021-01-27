@@ -12,6 +12,17 @@ const UserSchema = new Schema({
 	email:{...STRING,unique:true},
 	password:STRING,
 	image:{type:String},
+	friendRequests:{
+		received:{
+			type:Array,
+			default:[]
+		},
+		sent:{
+			type:Array,
+			default:[]
+		},
+	},
+	friends:[]
 });
 
 const ChatSchema = new Schema({
@@ -28,7 +39,7 @@ const MessageSchema = new Schema({
 			messages:[ChatSchema],		
 		}
 	]
-})
+});
 
 module.exports = {
 	Users:model("users",UserSchema),

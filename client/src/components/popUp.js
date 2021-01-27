@@ -1,7 +1,7 @@
 import React from "react";
 
 const PopUp = (props)=>{
-	const {active} = props;
+	const {active,setActive} = props;
 	return(
 	<React.Fragment>
 	{
@@ -10,6 +10,7 @@ const PopUp = (props)=>{
 			<div className="popupWindow-blur">
 			</div>
 			<div className="popupWindow">
+			<button className="popupClose" onClick={()=>setActive(false)}>x</button>
 			{props.children}
 			</div>
 		</React.Fragment>

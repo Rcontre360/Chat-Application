@@ -12,8 +12,7 @@ const {customErrorHandler,notFoundHandler} = require("./error_handlers");
 const routes = require("./routes");
 
 const logRequest = (req,res,nxt)=>{
-	console.log("BODY:",req.body);
-	console.log("QUERY:",req.query);
+	console.log(req.method+" BODY:"+req.body+" QUERY:"req.query)
 	nxt();
 }
 
@@ -41,7 +40,6 @@ const initServer = ()=>{
 		const morgan = require("morgan");
 		app.use(morgan("dev"));
 		app.use(express.static(path.join(__dirname, '../../client/public')));  
-		console.log(path.join(__dirname, '../client/public')) 
 		app.get('*', (req, res) => { 
 			res.sendFile(path.join(__dirname,'../client/public/index.html'));
 		});
@@ -50,8 +48,7 @@ const initServer = ()=>{
 	//app.all("*",notFoundHandler);
 	app.use(customErrorHandler);
 	const server = http.Server(app);
-
-	databaseConnection("mongodb://localhost:27017/chat_application");
+	databaseConnection(process.env.MONGO_URI);
 	configureSocket(server);
 
 	return server;

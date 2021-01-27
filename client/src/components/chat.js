@@ -47,9 +47,10 @@ export const ChatBox = (props)=>{
 	}
 
 	const sendMessage = (user,friend,message)=>{
+		//console.log("message sent",message,"to",friend);
 		if (message){
 			socket.emit("message",{user,friend,message});
-			addMessage({message,fromUser:"user"});
+			addMessage({message,source:true});
 		}
 	}
 
@@ -59,9 +60,9 @@ export const ChatBox = (props)=>{
 		let mounted = true;
 		const listenMessage = (data)=>{
 			const {user,message} = data;
-			console.log("message arrived: ",{user,friendTarget});
+			//console.log("message arrived: ",{user,friendTarget});
 			if (mounted && user.id==friendTarget.id)
-				addMessage({message,fromUser:"arrive"});
+				addMessage({message,source:false});
 		}
 
 		socket.off("message");
@@ -69,7 +70,6 @@ export const ChatBox = (props)=>{
 
 		if (friendTarget.id!=1000){
 			const response = await get("/users/messages",{friendId:friendTarget.id,id:userData.id});
-
 			if (response.data)
 				setMessages([...response.data]);
 			else 
@@ -94,13 +94,14 @@ export const ChatBox = (props)=>{
 			</div>
 			<div className="chatBox-foot">
 				<Form 
-					onChangeValue={setMessageValue.bind(this)} 
+					notFilter
+					deleteOnSend 
 					elements={chatForm} 
-					onSendData={()=>{
+					onSendData={(messageObj)=>{
 						sendMessage(
 							userData,
 							friendTarget,
-							currentMessage.message
+							messageObj.message
 						);
 					}}
 				/>
@@ -113,7 +114,7 @@ const Message = (props)=>{
 	const {text,user} = props;
 
 	return(
-		<div className={"message message-"+user}>
+		<div className={"message message-"+(user?"user":"arrive")}>
 			<p>
 			{text}
 			</p>

@@ -12,6 +12,7 @@ import {MessageContext,
 		} from "./contexts/mainContext";
 
 import "./css/main.css";
+import "./css/media.css"
 
 import io from "socket.io-client";
 
@@ -22,9 +23,12 @@ class App extends React.Component{
 
 		this.state = {
 			user:{	
-				name:"anonimous",
+				name:"",
 				logged:false,
-				email:"anonimous@gmail.com"
+				id:"",
+				email:"",
+				friends:[],
+				friendRequests:{received:[],sent:[]}
 			},
 			colorMode:"light",
 		}
@@ -40,12 +44,12 @@ class App extends React.Component{
 			credentials: "same-origin"
 		}
 		this.colors = {
-			"--color-primary":{dark:"#C2CBEA",light:"#203A3B"},
-			"--color-secondary":{dark:"#51BD8A",light:"#79B6D7"},
-			"--color-back-1":{dark:"#3E485F",light:"#DCEDEE"},
-			"--color-back-2":{dark:"#022A3F",light:"#B7DADB"},
-			"--color-back-3":{dark:"#0C152B",light:"#EEF5F5"},
-			"--color-back-4":{dark:"#115268",light:"#CADCDD"}
+			"--color-primary":{dark:"#EEEEEE",light:"#163172"},
+			"--color-secondary":{dark:"#4ECCA3",light:"#1e56a0"},
+			"--color-back-1":{dark:"#232931",light:"#f6f6f6"},
+			"--color-back-2":{dark:"#091C39",light:"#DCE9FE"},
+			"--color-back-3":{dark:"#0C152B",light:"#d6e4f0"},
+			"--color-back-4":{dark:"#393e46",light:"#CCD6E4"}
 		}
 
 		this.setUser = this.setUser.bind(this);
@@ -57,20 +61,23 @@ class App extends React.Component{
 		this.setColorMode = this.setColorMode.bind(this);
 		this.storeAccount = this.storeAccount.bind(this);
 		this.updateUserData = this.updateUserData.bind(this);
+		this.onArriveFriendRequest = this.onArriveFriendRequest.bind(this);
+		this.onArriveAcceptedRequest = this.onArriveAcceptedRequest.bind(this);
 	}
 
 	async componentDidMount(){
 		this.socket = io.connect("/");
+		this.socket.on("friendRequest",this.onArriveFriendRequest)
+		this.socket.on("acceptFriendRequest",this.onArriveAcceptedRequest)
+
 		const response = await this.getMethod("/users/authenticate",{});
-		if (response.message==="success"){
+
+		if (response.message==="success")
 			this.setUser(response);
-			console.log(this.state)
-		}
 		this.setColorMode();
 	}
 
 	componentWillUnmount(){
-		//this.socket.disconnect({...this.state.user,room:this.room});
 		if (!this.configuration.storeOnDevise){
 			this.logoutUser();
 		}
@@ -85,10 +92,10 @@ class App extends React.Component{
 			}).then(res=>{
 				return res.json();
 			}).then(res=>{
-				console.log("postRes: ",url,body,res)
+			//	//console.log("postRes: ",url,body,res)
 				resolve(res);
 			}).catch(err=>{
-				console.log("postError: ",url,body,err.message)
+			//	//console.log("postError: ",url,body,err.message)
 				reject(err);
 			});
 		});
@@ -106,10 +113,10 @@ class App extends React.Component{
 			}).then(res=>{
 				return res.json();
 			}).then(res=>{
-				console.log("getRes: ",url,query,res)
+			//	//console.log("getRes: ",url,query,res)
 				resolve(res);
 			}).catch(err=>{
-				console.log("getError: ",url,query,err.message)
+			//	//console.log("getError: ",url,query,err.message)
 				reject(err);
 			});
 		});
@@ -131,7 +138,7 @@ class App extends React.Component{
 				return resolve(user);
 			}
 
-			return reject(response);
+			reject(response);
 		})
 	}
 
@@ -154,7 +161,6 @@ class App extends React.Component{
 	setUser(response){
 		const {data:user,access_token,message} = response;
 		if (message==="success"){
-			this.configuration.room = user.room;
 			this.setState({user:{...user,logged:true}});
 			this.request.headers.Authorization = "Bearer "+access_token;
 			this.socket.emit("joinRoom",user);
@@ -164,10 +170,16 @@ class App extends React.Component{
 	async logoutUser(){
 		const res = await this.getMethod("/users/logout",this.state.user);
 		this.socket.emit("leaveRoom",{
-			room:this.configuration.room,
-			user:this.state.user
+			...this.state.user
 		});
-		const user = {name:"anonimous",logged:false};
+		const user = {
+			name:"",
+			logged:false,
+			id:"",
+			email:"",
+			friends:[],
+			friendRequests:{received:[],sent:[]}
+		};
 		this.setState({user});
 		this.request.headers.Authorization = "Bearer "+"invalid_token";
 	}
@@ -187,16 +199,39 @@ class App extends React.Component{
 	updateUserData(newUser){
 		return new Promise(async (resolve,reject)=>{
 			const response = await this.postMethod("/users/update",newUser);
-			resolve(response);
+			if (response.message==="success"){
+				const user = response.data
+				this.setState({user:{...user,logged:true}});
+				return resolve(response);
+			}
+			resolve(response)
 		});
 	}
 
+	onArriveFriendRequest(user){
+		//console.log(user)
+		this.setState(prevState=>{
+			prevState.user.friendRequests.received.push(user);
+			return prevState;
+		});
+	}
+
+	onArriveAcceptedRequest(user){
+		if (!this.state.user.friends.find(friend=>friend.id===user.id));
+			this.setState(prevState=>{
+				prevState.user.friends.push(user);
+				return prevState;
+			});
+	}
+
 	render(){
-
 		return(
-		<BrowserRouter basename="/React">
+		<BrowserRouter>
 
-			<Navbar logout={this.logoutUser} logged={this.state.user.logged}/>
+			<Navbar socket={this.socket} requests={this.state.user.friendRequests} 
+				logout={this.logoutUser} logged={this.state.user.logged} 
+				user={this.state.user}
+				addFriend={this.onArriveAcceptedRequest}/>
 
 			{
 				this.state.user.logged?

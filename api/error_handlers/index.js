@@ -1,7 +1,16 @@
 
-const asyncHandler = (callback)=>{
+const asyncExpressHandler = (callback)=>{
 	return (req,res,nxt)=>{
 		callback(req,res,nxt).catch(nxt);
+	}
+}
+
+const asyncHandler = (callback)=>{
+	return (...all)=>{
+		callback(...all).catch(err=>{
+			console.log("ERROR CAUGH: ",err.message);
+			console.log("AT: ",err.stack);
+		});
 	}
 }
 
@@ -25,8 +34,17 @@ const notFoundHandler = (req,res)=>{
 	throw err;
 }
 
+const throwCustomError = (error)=>{
+	const param = error.param
+	const err = new Error(param+error.msg);
+	err.status = error.status;
+	throw err;
+}
+
 module.exports = {
 	customErrorHandler,
+	asyncExpressHandler,
 	asyncHandler,
-	notFoundHandler
+	notFoundHandler,
+	throwCustomError
 };

@@ -21,14 +21,8 @@ export const Register = (props)=>{
 	const [showMessage,setShowMessage] = React.useState(false);
 	const [messageData,setMessageData] = React.useState({});
 	const {registerUser,history} = props;
-	const userData = {};
 
-	const setDataValues = (dataType,e)=>{
-		userData[dataType] = e.target.value;
-	}
-
-	const sendUserData = (e)=>{
-		e.preventDefault();
+	const sendUserData = (userData)=>{
 		registerUser({...userData,logged:true})
 		.then(res=>{
 			history.push("/users");
@@ -41,10 +35,10 @@ export const Register = (props)=>{
 
 	return(
 	<div className="form-wrapper">
-		{showMessage && <Message closeMessage={setShowMessage.bind(this)} {...messageData}/>}
 		<div className="form">
 			<h1 className="login-title">Registration</h1>
-			<Form elements={loginForm} onSendData={sendUserData.bind(this)} onChangeValue={setDataValues.bind(this)}/>
+			{showMessage && <Message closeMessage={setShowMessage.bind(this)} {...messageData}/>}
+			<Form elements={loginForm} onSendData={sendUserData.bind(this)}/>
 		</div>
 	</div>
 	)

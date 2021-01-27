@@ -1,3 +1,4 @@
+
 .profile{
 	display: flex;
 	padding-top:90px;
@@ -70,14 +71,32 @@
 	padding-top:20px;
 }
 
+.profile-contacts .contacts-title{
+	margin-bottom: 10px;
+}
+
+.profile-contacts .contacts{
+	background: var(--color-back-3);
+	padding: 2vw;
+	display: flex;
+	border-radius: 10px;
+	overflow-x: scroll;
+}
+
 .profile-data .data-option{
 	display: flex;
 	justify-content: space-between;
 	padding: 20px;
 }
 
-.data-option span,.data-option p{
-	flex:1;
+.profile-data .data-option div{
+	display: flex;
+	justify-content: space-around;
+	flex:2;
+}
+
+.profile-data .data-option div span{
+	font-weight: bolder;
 }
 
 .profile-data .data-option button{
@@ -89,7 +108,7 @@
 }
 
 .profile-data .data-option button:active{
-	background: lightgreen;
+	background: var(--color-primary);
 	border:inset var(--color-secondary) 3px;
 }
 
@@ -112,6 +131,11 @@
 	margin-right: 10vw;
 	outline: none;
 } 
+
+.profile-config button:hover{
+	background: transparent;
+	color:transparent;
+}
 
 .profile-config i{
 	color:var(--color-primary);

@@ -7,6 +7,7 @@ export const UserContext = createContext({
 	id:1000,
 	updateUserData:()=>1,
 	setUser:()=>1,
+	friends:[]
 });
 
 export const MessageContext = createContext({

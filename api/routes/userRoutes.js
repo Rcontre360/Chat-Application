@@ -3,29 +3,21 @@ const {v4} = require("uuid");
 const router = Router();
 
 const {Users,Messages} = require("../schemas");
-const {asyncHandler} = require("../error_handlers");
+const {asyncExpressHandler,throwCustomError} = require("../error_handlers");
 const {	hashPassword,
 		confirmPassword,
 		createToken,
 		sendAuthTokens,
 		isAuthorized,
 		isAuthorizedByCookies } = require("../auth");
+const { userFullValidation,
+		registerValidator,
+		loginValidator,
+		updateValidator} = require("../helpers/validators");
 
-router.get("/",asyncHandler(async (req,res)=>{
-	const {data:authData} = isAuthorized(req);
-
-	if (!authData){
-		let err = new Error("Unauthorized request for users");
-		err.status = 403;
-		throw err;
-	}
+router.get("/",isAuthorized,asyncExpressHandler(async (req,res)=>{
 
 	const response = await Users.find({},{email:1,name:1,_id:1});
-
-	if (response.ok==0){
-		let err = new Error("There was an error trying to update your data, please try later");
-		throw err;
-	}
 
 	res.json({
 		message:"success",
@@ -35,25 +27,15 @@ router.get("/",asyncHandler(async (req,res)=>{
 	});
 }));
 
-router.get("/messages",asyncHandler(async (req,res)=>{
+router.get("/messages",isAuthorized,asyncExpressHandler(async (req,res)=>{
 	const {id,friendId} = req.query;
-
-	const {data:authData,err} = isAuthorized(req);
-
-	if (err || authData.id!=id){
-		let err = new Error("Unauthorized request for messages");
-		err.status = 403;
-		throw err;
-	}
 
 	let response = (await Messages.findOne({userId:id},{_id:0,userId:0,"__v":0})).friend;
 
-	console.log("LOGS")
-	console.log(response)
-	console.log(response.filter(m=>m.friendId===friendId))
-
-	if (response.length>0)
-		response = response.filter(m=>m.friendId!==friendId)[0].messages;
+	if (response.length>0){
+		response = response.find(m=>m.friendId===friendId);
+		response = response?response.messages:[];
+	}
 
 	res.json({
 		message:"success",
@@ -61,83 +43,106 @@ router.get("/messages",asyncHandler(async (req,res)=>{
 	});
 }));
 
-router.get("/authenticate",asyncHandler(async(req,res)=>{
-	const {data:authData,err:authError} = isAuthorizedByCookies(req,res);
-	let user;
+router.get("/authenticate",isAuthorizedByCookies,asyncExpressHandler(async (req,res)=>{
+	const user = req.userData;
+	console.log("authenticate",user);
 
-	if (!authError && authData)
-		user = (await Users.findById(authData.id));
-
-	if (authError || !user){
-		let message;
-		if (authError)
-			message = authError.message;
-		let err = new Error(message?message:"there was a problem when trying to authenticate")
-		err.status = message?403:401;
-		throw err;
-	}
-
-	sendAuthTokens(res,user);
+	sendAuthTokens(res,{
+		name:user.name,
+		email:user.email,
+		id:user.id,
+		friends:user.friends,
+		friendRequests:user.friendRequests
+	});
 }));
 
-router.get("/logout",asyncHandler(async(req,res)=>{
-	const query = req.query;
+router.get("/logout",asyncExpressHandler(async(req,res)=>{
 	res.clearCookie("refresh_token",{path:"/"});
 	res.json({
 		message:"success"
 	});
 }));
 
-router.post("/login",asyncHandler(async (req,res)=>{
-	const {password,name,email} = req.body;
+router.post("/update",
+	userFullValidation,
+	updateValidator,
+	isAuthorized,
+	asyncExpressHandler(async (req,res)=>{
 
-	const {password:hashedPassword,id} = (await Users.find({name,email}))[0];
+	const {id} = req.body;
+	const response = await Users.updateOne({_id:id},{...req.body});
+	const user = (await Users.find({_id:id},{password:0,_id:0,room:0}))[0];
 
-	const passwordSuccess = await confirmPassword(password,hashedPassword);
+	res.json({
+		message:"success",
+		data:{
+			name:user.name,
+			email:user.email,
+			id
+		}
+	});
+}));
 
-	if (!passwordSuccess){
-		let err = new Error("Username, email or password incorrect");
-		err.status = 402;
-		throw err;
+router.post("/login",
+	userFullValidation,
+	loginValidator,
+	asyncExpressHandler(async (req,res)=>{
+
+	const loginError = {
+		msg:"Username, email or password incorrect",
+		param:"",
+		status:402
 	}
 
-	sendAuthTokens(res,{password,name,email,id});
-}));
-router.post("/register",asyncHandler(async (req,res)=>{
-	let {name,email,password:formPassword} = req.body;
+	console.log(req.body)
+	const {password,name,email} = req.body;
+	const response = (await Users.find({name,email}))[0];
 
+	if (!response)
+		throwCustomError(loginError);
+
+	const passwordSuccess = await confirmPassword(password,response.password);
+
+	if (!passwordSuccess)
+		throwCustomError(loginError);
+
+	sendAuthTokens(res,{
+		name,
+		email,
+		id:response.id,
+		friends:response.friends,
+		friendRequests:response.friendRequests
+	});
+}));
+
+router.post("/register",
+	userFullValidation,
+	registerValidator,
+	asyncExpressHandler(async (req,res)=>{
+
+	let {name,email,password:formPassword} = req.body;
 	const response = await Users.find({name,email});
 
-	if (response.length){
-		let err = new Error("Username or email were already taken");
-		err.status = 403;
-		throw err;
-	}
+	if (response.length>0)
+		throwCustomError({
+			msg:"Username or email were already taken",
+			param:"",
+			status:400
+		});
 
 	const room = v4();
 	const password = await hashPassword(formPassword);
 	const user = await Users.create({password,name,email,room});
 	await Messages.create({userId:user.id,friend:[]});
 
-	sendAuthTokens(res,user);
-}));
-
-router.put("/update",asyncHandler(async (req,res)=>{
-	const {id} = req.body;
-	const {data:authData,authError} = isAuthorized(req);
-
-	if (authData.id!=id || authError){
-		let err = new Error("Unauthorized request for update");
-		err.status = 403;
-		throw err;
-	}
-	
-	const response = await Users.update({_id:id},req.body);
-	res.json({
-		message:"success"
+	sendAuthTokens(res,{
+		name:user.name,
+		email:user.email,
+		id:user.id,
+		friends:user.friends,
+		friendRequests:user.friendRequests
 	});
 }));
-
 
 module.exports = router;
 
