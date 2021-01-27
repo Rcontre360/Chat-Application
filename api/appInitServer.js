@@ -12,7 +12,7 @@ const {customErrorHandler,notFoundHandler} = require("./error_handlers");
 const routes = require("./routes");
 
 const logRequest = (req,res,nxt)=>{
-	console.log(req.method+" BODY:"+req.body+" QUERY:"req.query)
+	console.log(req.method+" BODY:"+req.body+" QUERY:"+req.query)
 	nxt();
 }
 
