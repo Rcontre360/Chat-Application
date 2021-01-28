@@ -62,7 +62,7 @@ export const Navbar = (props)=>{
 		user,
 		addFriend
 	} = props;
-	const [onSidebar,setOnSidebar] = React.useState(false);
+	const [onNavbar,setOnNavbar] = React.useState(false);
 	const userRequestReceived = [];
 
 	const acceptFriendRequest = (friend)=>{
@@ -80,17 +80,9 @@ export const Navbar = (props)=>{
 		);
 	});
 
-	const toggleSidebar = (toggled)=>{
-		setOnSidebar(toggled);
-
-		const sidebar = document.querySelector(".sidebar");
+	const toggleNavbar = (toggled)=>{
+		setOnNavbar(!onNavbar)
 		const navbar = document.querySelector(".navbar");
-
-		if (sidebar && toggled)
-			sidebar.id = "sidebar-toggle";
-		else if (sidebar)
-			sidebar.id = "";
-
 		if (navbar && toggled)
 			navbar.id = "navbar-toggle";
 		else
@@ -111,11 +103,11 @@ export const Navbar = (props)=>{
 
 			<div className="navbar-list">
 
-			<div onClick={()=>toggleSidebar(!onSidebar)} id={"dropdown"+(onSidebar?"-toggled":"")} className="navbar-li">
+			<div onClick={()=>toggleNavbar(!onNavbar)} id={"dropdown"+(onNavbar?"-toggled":"")} className="navbar-li">
 				<i  className="navbar-link fa fa-bars"></i>
 			</div>
 
-				<ul className={"navbar-ul"+(onSidebar?"-toggled":"")}>
+				<ul className={"navbar-ul"+(onNavbar?"-toggled":"")}>
 
 				{
 					items.map((i,id)=>{

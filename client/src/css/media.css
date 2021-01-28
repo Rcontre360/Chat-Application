@@ -8,10 +8,16 @@
 		display: none;
 	}
 
+	.navbar .navbar-li{
+		padding: 10px;
+		font-size:80%;
+	}
+
 	#navbar-toggle .navbar-list{
 		display: flex;
 		width: 100%;
 		justify-content: space-between;
+		padding-right: 10px;
 	}
 
 	.navbar .navbar-ul-toggled{
@@ -39,7 +45,11 @@
 		padding-top: 150px;
 		position: absolute;
 		transition: 1s;
-		transform: translateX(-500px);
+		transform: translateX(-100%);
+	}
+
+	.sidebar .toggle-btn{
+		display: block;
 	}
 
 	#sidebar-toggle{
@@ -86,6 +96,14 @@
 
 	.profile-data .data-option div>*{
 		padding: 5px 0px;
+	}
+
+	.sidebar{
+		max-width:75%;
+	}
+
+	.sidebar .sidebar-body .user{
+		margin: 0px;
 	}
 }
 

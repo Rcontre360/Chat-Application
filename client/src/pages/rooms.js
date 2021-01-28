@@ -105,6 +105,7 @@ const Sidebar = (props)=>{
 	const {setUserFriend,userData} = props;
 	const {socket,get} = React.useContext(MessageContext);
 	const [userList,setUserList] = React.useState([]);
+	const [onSidebar,setOnSidebar] = React.useState(false);
 
 	const setConnectedUser = (user,connected)=>{
 		setUserList(prevUsers=>{
@@ -116,6 +117,18 @@ const Sidebar = (props)=>{
 			prevUsers[index].logged = connected;
 			return [...prevUsers];	
 		})
+	}
+
+	const toggleSidebar = (toggled)=>{
+		setOnSidebar(toggled);
+
+		const sidebar = document.querySelector(".sidebar");
+		
+		if (sidebar && toggled)
+			sidebar.id = "sidebar-toggle";
+		else if (sidebar)
+			sidebar.id = "";
+
 	}
 
 	React.useEffect(async ()=>{
@@ -151,10 +164,13 @@ const Sidebar = (props)=>{
 			userList  &&	userList.map((el,id)=>{
 				if (el.id===userData.id)
 					return <React.Fragment key={id}></React.Fragment>
-				return <UserElement onClick={setUserFriend} {...el} key={id}/>
+				return <UserElement size={40} onClick={setUserFriend} {...el} key={id}/>
 			})
 		}
 		</div>
+		<button onClick={e=>toggleSidebar(!onSidebar)}className="toggle-btn">
+			<i  className="navbar-link fa fa-bars"></i>
+		</button>
 	</aside>
 	);
 }
